@@ -3,16 +3,10 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import java.util.List;
-import java.util.Random;
 
 public class AgenteJugador extends Agent {
 
-    private static final String SOLVE_PREFIX = "resolver|";
-    private String[] respuestas = {
-            "no quiero jugar",
-            "estoy listo",
-            "no sé las reglas del juego"
-    };
+    private static final String START_PREFIX = "INICIAR:";
 
     @Override
     protected void setup() {
@@ -21,30 +15,21 @@ public class AgenteJugador extends Agent {
         addBehaviour(new CyclicBehaviour() {
             @Override
             public void action() {
-                // Escuchar mensajes de tipo INFORM
-                MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+                MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
                 ACLMessage msg = receive(mt);
 
                 if (msg != null) {
                     String contenido = msg.getContent();
                     System.out.println("[" + getLocalName() + "] Mensaje recibido: " + contenido);
 
-                    if (contenido.startsWith(SOLVE_PREFIX)) {
-                        responderSolucion(msg, contenido.substring(SOLVE_PREFIX.length()));
-                    } else if ("competencia iniciada".equalsIgnoreCase(contenido)) {
-                        responderCompetencia(msg);
+                    if (contenido != null && contenido.startsWith(START_PREFIX)) {
+                        responderSolucion(msg, contenido.substring(START_PREFIX.length()));
                     }
                 } else {
                     block(); // Bloquear hasta recibir un nuevo mensaje
                 }
             }
         });
-    }
-
-    private void responderCompetencia(ACLMessage msg) {
-        Random rand = new Random();
-        String respuestaElegida = respuestas[rand.nextInt(respuestas.length)];
-        responder(msg, respuestaElegida);
     }
 
     private void responderSolucion(ACLMessage msg, String boardInput) {
@@ -72,6 +57,13 @@ public class AgenteJugador extends Agent {
                 response.append(i)
                         .append(". h(n)=").append(EightPuzzleSolver.euclideanDistance(currentBoard))
                         .append("  ").append(formatBoard(currentBoard)).append('\n');
+            }
+            response.append("ANIMACION:");
+            for (int i = 0; i < path.size(); i++) {
+                if (i > 0) {
+                    response.append(';');
+                }
+                response.append(PuzzleState.serialize(path.get(i)));
             }
             responder(msg, response.toString());
         } catch (IllegalArgumentException e) {

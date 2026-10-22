@@ -25,9 +25,8 @@ public class Main {
         }
 
         try {
+            container.createNewAgent("AgenteGeneradorReto", "AgenteGeneradorReto", new Object[0]).start();
             container.createNewAgent("AgenteGUI", "AgenteGUI", new Object[0]).start();
-            container.createNewAgent("Jugador1", "AgenteJugador", new Object[0]).start();
-            container.createNewAgent("Jugador2", "AgenteJugador", new Object[0]).start();
             container.createNewAgent("Jugador3", "AgenteJugador", new Object[0]).start();
         } catch (StaleProxyException e) {
             e.printStackTrace();

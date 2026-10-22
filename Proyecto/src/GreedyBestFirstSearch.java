@@ -79,13 +79,22 @@ public final class GreedyBestFirstSearch<S> {
             }
 
             for (S successor : graph.successors(current.state)) {
-                if (discovered.add(successor)) {
+                if (!createsCycle(current, successor) && discovered.add(successor)) {
                     frontier.add(new Node<>(successor, current, estimate(heuristic, successor), insertionOrder++));
                 }
             }
         }
 
         return new Result<>(Collections.<S>emptyList(), expandedNodes);
+    }
+
+    private boolean createsCycle(Node<S> current, S successor) {
+        for (Node<S> ancestor = current; ancestor != null; ancestor = ancestor.parent) {
+            if (ancestor.state.equals(successor)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private double estimate(Heuristic<S> heuristic, S state) {
